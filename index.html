@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Portfolio Builder Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices: 
+        - Report (Sec 1, Intro): Goal: Inform on portfolio importance. Method: Hero section text. Interaction: Static. Justification: Sets context.
+        - Report (Sec 2, Strategy): Goal: Guide strategy. Method: Text, interactive prompts (simulated). Interaction: Informative text. Justification: Emphasizes planning.
+        - Report (Sec 3.1-3.2, Projects): Goal: Show how to detail projects. Method: Expandable cards with Challenge/Role/Solution/Impact. Interaction: Click to expand. Justification: Core for adding experiences; makes complex info digestible. Library: HTML/JS.
+        - Report (Sec 3.3, Skills): Goal: Illustrate skills display. Method: Text, Chart.js bar chart (example skill proficiency). Interaction: Chart hover. Justification: Visual, common in portfolios. Library: Chart.js.
+        - Report (Sec 3.4, About Me/Resume): Goal: Guide personal branding. Method: Example text sections. Interaction: Static. Justification: Essential portfolio components.
+        - Report (Sec 3.5, Testimonials): Goal: Show credibility building. Method: Example testimonial cards. Interaction: Static. Justification: Highlights social proof.
+        - Report (Sec 3.6, Contact): Goal: Show how to enable contact. Method: Example contact elements. Interaction: Static. Justification: Crucial for engagement.
+        - Report (Sec 4, Design): Goal: Explain UX/UI importance. Method: Informative text, visual examples. Interaction: Potentially toggle good/bad design (simplified to text tips for now). Justification: Shows impact of design.
+        - Report (Sec 5, Platforms): Goal: Compare platforms. Method: HTML table of platforms (from Table 3), Chart.js bar chart (platform ratings). Interaction: Table view, chart hover. Justification: Aids platform selection. Library: Chart.js.
+        - Report (Sec 6-7, Maintenance/Mistakes): Goal: Advise on upkeep and pitfalls. Method: Interactive checklists, tips. Interaction: Clickable checklist items. Justification: Actionable advice.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar-open {
+            transform: translateX(0);
+        }
+        .sidebar-closed {
+            transform: translateX(-100%);
+        }
+        .main-content-shifted {
+            margin-left: 256px; /* Same as sidebar width */
+            transition: margin-left 0.3s ease-in-out;
+        }
+         .main-content-normal {
+            margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        .section-intro {
+            background-color: #e0f2fe; /* light sky blue */
+            border-left: 4px solid #0ea5e9; /* sky blue */
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800">
+
+    <header class="bg-sky-700 text-white p-4 shadow-md fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Interactive Portfolio Builder Guide</h1>
+            <button id="menuButton" class="md:hidden p-2 rounded-md hover:bg-sky-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <aside id="sidebar" class="sidebar sidebar-closed md:sidebar-open w-64 bg-white shadow-lg p-4 fixed md:sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto z-40">
+            <nav>
+                <ul class="space-y-2">
+                    <li><a href="#introduction" class="tab-link block font-semibold p-2 hover:bg-stone-200 rounded-md text-sky-700" data-tab="introduction">Welcome</a></li>
+                    <li><a href="#strategy" class="tab-link block font-semibold p-2 hover:bg-stone-200 rounded-md" data-tab="strategy">1. Define Your Strategy</a></li>
+                    <li><a href="#content" class="tab-link block font-semibold p-2 hover:bg-stone-200 rounded-md" data-tab="content">2. Build Your Content</a></li>
+                    <li><a href="#design" class="tab-link block font-semibold p-2 hover:bg-stone-200 rounded-md" data-tab="design">3. Design & UX</a></li>
+                    <li><a href="#platform" class="tab-link block font-semibold p-2 hover:bg-stone-200 rounded-md" data-tab="platform">4. Choose Your Platform</a></li>
+                    <li><a href="#maintenance" class="tab-link block font-semibold p-2 hover:bg-stone-200 rounded-md" data-tab="maintenance">5. Maintain & Avoid Mistakes</a></li>
+                    <li><a href="#contact-example" class="tab-link block font-semibold p-2 hover:bg-stone-200 rounded-md" data-tab="contact-example">6. Example Contact</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main id="mainContent" class="flex-1 p-6 md:p-8 overflow-y-auto main-content-normal md:main-content-shifted">
+            
+            <section id="introduction" class="tab-content active">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-3xl font-bold mb-4 text-sky-700">Welcome to Your Portfolio Journey!</h2>
+                    <div class="section-intro">
+                        <p class="text-lg text-stone-700">This interactive guide helps you understand the power of a professional portfolio. It's more than a resume; it's a dynamic showcase of your skills, experiences, and unique value. Let's explore how to build one that opens doors!</p>
+                    </div>
+                    <p class="mb-4">A professional portfolio is a cornerstone for career advancement. It's a curated collection of your work, demonstrating your capabilities and potential. Unlike a resume that summarizes, a portfolio <strong class="text-sky-600">shows</strong> what you can do through tangible evidence.</p>
+                    <p class="mb-4">This guide will walk you through:</p>
+                    <ul class="list-disc list-inside space-y-1 text-stone-700 mb-4">
+                        <li>Defining a clear strategy for your portfolio.</li>
+                        <li>Curating and crafting compelling content, including project narratives and skills.</li>
+                        <li>Designing for impact and user experience.</li>
+                        <li>Choosing the right platform to host your work.</li>
+                        <li>Maintaining your portfolio and avoiding common pitfalls.</li>
+                    </ul>
+                    <p>Navigate using the sidebar to explore each section. Let's begin crafting a portfolio that truly represents you!</p>
+                </div>
+            </section>
+
+            <section id="strategy" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-3xl font-bold mb-6 text-sky-700">1. Define Your Strategy</h2>
+                    <div class="section-intro">
+                        <p class="text-lg text-stone-700">Before you start building, it's crucial to define your portfolio's goals and target audience. A well-defined strategy ensures your portfolio speaks directly to your desired employers or clients, showcasing how your skills solve their specific problems. This section guides you through these foundational steps.</p>
+                    </div>
+                    
+                    <div class="mb-6 p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <h3 class="text-xl font-semibold text-sky-700 mb-2">Who is your audience?</h3>
+                        <p class="mb-2">Consider who you want to reach. Are they potential employers in a specific industry? Freelance clients? Academic reviewers? Understanding their needs and expectations is key.</p>
+                        <p class="italic text-sm text-stone-600">Example: "I'm targeting hiring managers at tech startups for a UX design role. They value problem-solving, user-centered design processes, and tangible results."</p>
+                    </div>
+
+                    <div class="mb-6 p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <h3 class="text-xl font-semibold text-sky-700 mb-2">What are your goals?</h3>
+                        <p class="mb-2">What do you want your portfolio to achieve? Secure job interviews? Attract new clients? Showcase expertise in a niche area?</p>
+                        <p class="italic text-sm text-stone-600">Example: "My goal is to get interviews for senior project manager positions by highlighting my leadership in complex projects and ability to deliver on time and budget."</p>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold text-sky-700 mb-2">Tailor Your Message</h3>
+                        <p>Your portfolio is a marketing tool. Customize your content, language, and showcased projects to align with the specific roles or opportunities you're pursuing. Research your target audience's pain points and position yourself as the solution.</p>
+                        <p class="mt-2 p-3 bg-amber-100 border-l-4 border-amber-500 text-amber-700 rounded-md"><strong>Key takeaway:</strong> A one-size-fits-all portfolio is less effective. Be prepared to adapt and highlight what's most relevant for each specific opportunity.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="content" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-3xl font-bold mb-6 text-sky-700">2. Build Your Content</h2>
+                    <div class="section-intro">
+                         <p class="text-lg text-stone-700">This is where you bring your professional story to life. We'll cover curating your best work, crafting compelling project narratives using the 'Challenge, Role, Solution, Impact' framework, showcasing skills, and including essential professional context like your 'About Me' section, resume, and testimonials.</p>
+                    </div>
+
+                    <div class="mb-6 border-b border-stone-300">
+                        <nav class="flex space-x-1" aria-label="Tabs">
+                            <button class="content-sub-tab-link active-sub-tab" data-subtab="about-me">About Me</button>
+                            <button class="content-sub-tab-link" data-subtab="projects">Projects/Experiences</button>
+                            <button class="content-sub-tab-link" data-subtab="skills">Skills & Tools</button>
+                            <button class="content-sub-tab-link" data-subtab="resume-edu">Resume & Education</button>
+                            <button class="content-sub-tab-link" data-subtab="testimonials">Testimonials</button>
+                        </nav>
+                    </div>
+
+                    <div id="about-me" class="content-sub-tab-content active-sub-content">
+                        <h3 class="text-2xl font-semibold text-sky-600 mb-3">About Me / Personal Statement</h3>
+                        <div class="section-intro !bg-sky-50 !border-sky-300">
+                            <p class="text-stone-700">The 'About Me' section is your chance to tell your story. It’s where you connect with viewers on a personal level, sharing your professional identity, passions, and what makes you unique. Aim for a concise, engaging introduction.</p>
+                        </div>
+                        <p class="mb-2">This section introduces who you are, your career goals, and what makes you unique. It's your professional elevator pitch.</p>
+                        <div class="p-4 border rounded-md bg-stone-50 mb-4">
+                            <p class="font-semibold">Example Structure:</p>
+                            <ul class="list-disc list-inside text-sm text-stone-600 mt-1">
+                                <li>Your Name & Area of Expertise: "Hi, I'm [Your Name], a passionate [Your Profession] specializing in [Your Specialty]."</li>
+                                <li>Key Achievements/Passion: "With X years of experience, I've had the privilege of [mention a key achievement or type of work]. I'm driven by [Your Passion/Core Value]."</li>
+                                <li>Unique Approach: "My approach to [Your Work] is [Describe your unique method/philosophy]."</li>
+                                <li>Call to Action (optional): "I'm excited about opportunities to [Your Goal]. Let's connect!"</li>
+                            </ul>
+                            <p class="mt-3 text-xs italic">Include a professional photo. Keep the tone friendly and conversational.</p>
+                        </div>
+                    </div>
+
+                    <div id="projects" class="content-sub-tab-content">
+                        <h3 class="text-2xl font-semibold text-sky-600 mb-3">Projects / Experiences (Quality over Quantity!)</h3>
+                         <div class="section-intro !bg-sky-50 !border-sky-300">
+                            <p class="text-stone-700">Showcase your best work here (aim for 5-10 strong, relevant pieces). Each project entry should be a mini-case study, clearly outlining the Challenge, Your Role, the Solution you implemented, and the measurable Impact of your work. This is where you "show, not just tell."</p>
+                        </div>
+                        <p class="mb-4">Select 5-10 of your strongest and most relevant projects. Focus on quality over quantity. For each project, provide a compelling narrative.</p>
+                        
+                        <div class="space-y-6" id="projectList">
+                        </div>
+
+                        <div class="mt-6 p-4 border-t border-stone-300">
+                            <h4 class="text-lg font-semibold text-sky-700 mb-2">Guide: Adding a New Project (Conceptual)</h4>
+                            <p class="text-sm mb-3">When adding a project to your actual portfolio, use the following structure. This helps potential employers understand your contributions and impact.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div class="p-3 bg-stone-50 rounded border"><strong>Project Title:</strong> Clear and concise.</div>
+                                <div class="p-3 bg-stone-50 rounded border"><strong>Brief Overview:</strong> What was the project's main goal?</div>
+                                <div class="p-3 bg-stone-50 rounded border"><strong>Challenge/Problem:</strong> What obstacle or need did you face?</div>
+                                <div class="p-3 bg-stone-50 rounded border"><strong>Your Role & Contributions:</strong> What exactly did you do? Your responsibilities?</div>
+                                <div class="p-3 bg-stone-50 rounded border"><strong>Approach/Methodology:</strong> How did you tackle it? What strategies/tools did you use?</div>
+                                <div class="p-3 bg-stone-50 rounded border"><strong>Solution Implemented:</strong> What was the specific solution?</div>
+                                <div class="p-3 bg-stone-50 rounded border"><strong>Measurable Results & Impact:</strong> Quantify outcomes (e.g., "Increased X by Y%", "Reduced Z by W%").</div>
+                                <div class="p-3 bg-stone-50 rounded border"><strong>Skills/Tools Used:</strong> List key technologies or skills.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="skills" class="content-sub-tab-content">
+                        <h3 class="text-2xl font-semibold text-sky-600 mb-3">Skills & Tools</h3>
+                         <div class="section-intro !bg-sky-50 !border-sky-300">
+                            <p class="text-stone-700">Clearly list your technical and soft skills. More importantly, demonstrate these skills in action within your project descriptions to provide concrete evidence of your capabilities. You can also visually represent your skill proficiency.</p>
+                        </div>
+                        <p class="mb-4">Dedicate a section to list your proficiencies, including technical skills, software knowledge, and soft skills. Also, integrate these into your project descriptions.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold text-sky-700 mb-2">Example Skill Categories:</h4>
+                                <ul class="list-disc list-inside space-y-1 text-sm text-stone-600">
+                                    <li>Programming Languages: Python, JavaScript, Java</li>
+                                    <li>Design Software: Figma, Adobe XD, Sketch</li>
+                                    <li>Project Management Tools: Jira, Asana, Trello</li>
+                                    <li>Frameworks: React, Angular, Vue.js</li>
+                                    <li>Soft Skills: Communication, Teamwork, Problem-Solving</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-sky-700 mb-2">Visualizing Skills (Example)</h4>
+                                <div class="chart-container bg-stone-50 p-2 rounded-md shadow">
+                                    <canvas id="skillsChart"></canvas>
+                                </div>
+                                <p class="text-xs italic text-center mt-1">Use charts to visually represent skill levels or areas of expertise.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="resume-edu" class="content-sub-tab-content">
+                        <h3 class="text-2xl font-semibold text-sky-600 mb-3">Resume/CV & Education</h3>
+                         <div class="section-intro !bg-sky-50 !border-sky-300">
+                            <p class="text-stone-700">Provide easy access to your formal qualifications. Include your up-to-date resume (ideally as a downloadable PDF), degrees, and any relevant certifications to offer a complete picture of your professional background.</p>
+                        </div>
+                        <div class="mb-6">
+                            <h4 class="text-lg font-semibold text-sky-700 mb-1">Resume/CV</h4>
+                            <p class="text-sm mb-2">Include a link to a downloadable PDF of your current resume. Ensure it's tailored and up-to-date.</p>
+                            <a href="#" class="inline-block bg-sky-600 text-white px-4 py-2 rounded-md hover:bg-sky-700 text-sm">Download Example Resume (PDF)</a>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-sky-700 mb-1">Education & Certifications</h4>
+                            <ul class="list-disc list-inside space-y-1 text-sm text-stone-600">
+                                <li>M.Sc. in Computer Science, XYZ University (Year)</li>
+                                <li>B.A. in Graphic Design, ABC College (Year)</li>
+                                <li>Certified Project Management Professional (PMP) - (Year)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div id="testimonials" class="content-sub-tab-content">
+                        <h3 class="text-2xl font-semibold text-sky-600 mb-3">Testimonials & Endorsements</h3>
+                        <div class="section-intro !bg-sky-50 !border-sky-300">
+                             <p class="text-stone-700">Leverage the power of social proof. Positive feedback from past clients, employers, or colleagues builds credibility and validates the quality of your work. Always ask for permission before sharing.</p>
+                        </div>
+                        <p class="mb-4">Include short, specific, and relevant quotes from past employers, clients, or colleagues. This builds credibility.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 border rounded-md bg-stone-50 shadow">
+                                <p class="italic text-sm">"[Your Name] was instrumental in the success of Project X. Their problem-solving skills and dedication were exceptional."</p>
+                                <p class="text-xs font-semibold mt-2">- Jane Doe, Former Manager at Company A</p>
+                            </div>
+                            <div class="p-4 border rounded-md bg-stone-50 shadow">
+                                <p class="italic text-sm">"Working with [Your Name] was a pleasure. They delivered high-quality work on time and exceeded our expectations."</p>
+                                <p class="text-xs font-semibold mt-2">- John Smith, Client at Company B</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="design" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-3xl font-bold mb-6 text-sky-700">3. Design & User Experience (UX)</h2>
+                     <div class="section-intro">
+                        <p class="text-lg text-stone-700">The visual presentation and ease of use of your portfolio are as crucial as its content. A well-designed portfolio captures attention and communicates professionalism. This section covers key aspects like visual appeal, branding, intuitive navigation, mobile responsiveness, and using multimedia effectively.</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-xl font-semibold text-sky-700 mb-1">Visual Appeal & Branding</h3>
+                            <p class="text-sm">Use high-quality images and videos. Maintain a consistent brand (colors, fonts, style) across your portfolio. Keep the design clean, with good use of white space.</p>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-sky-700 mb-1">Intuitive Navigation</h3>
+                            <p class="text-sm">Organize content logically with clear headings. Ensure navigation is seamless, allowing users to easily find what they're looking for. Your strongest projects should be easily accessible from the homepage.</p>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-sky-700 mb-1">Mobile Responsiveness</h3>
+                            <p class="text-sm">Ensure your portfolio looks great and functions well on all devices (desktops, tablets, mobiles). Test thoroughly.</p>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-sky-700 mb-1">Multimedia Engagement</h3>
+                            <p class="text-sm">Use images, videos, or infographics to break up text and illustrate complex ideas. For interactive projects, a short demo video can be very effective.</p>
+                        </div>
+                         <div class="mt-4 p-3 bg-amber-100 border-l-4 border-amber-500 text-amber-700 rounded-md text-sm">
+                            <strong>Pro Tip:</strong> Your portfolio's design itself is a demonstration of your attention to detail and professionalism.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="platform" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-3xl font-bold mb-6 text-sky-700">4. Choose Your Platform</h2>
+                    <div class="section-intro">
+                         <p class="text-lg text-stone-700">Selecting the right platform is key to easily building and managing your portfolio. There are many user-friendly online builders available. This section provides an overview of popular options and considerations for effortless updates, aligning with your need to "easily add experiences and projects."</p>
+                    </div>
+                    <p class="mb-4">There are many online portfolio builders. Consider ease of use, features, cost, and how well it suits your technical skills and content type.</p>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold text-sky-700 mb-2">Popular User-Friendly Options (Summary from Report Table 3)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm border border-stone-300">
+                                <thead class="bg-stone-100">
+                                    <tr>
+                                        <th class="p-2 border-b">Platform</th>
+                                        <th class="p-2 border-b">Ease of Use</th>
+                                        <th class="p-2 border-b">Key Features</th>
+                                        <th class="p-2 border-b">Free Tier</th>
+                                        <th class="p-2 border-b">Best For</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="p-2 border-b">Wix</td><td class="p-2 border-b">Drag-and-drop</td><td class="p-2 border-b">500+ templates</td><td class="p-2 border-b">Yes (Wix branding)</td><td class="p-2 border-b">Beginners, general</td></tr>
+                                    <tr><td class="p-2 border-b">Adobe Portfolio</td><td class="p-2 border-b">Very user-friendly</td><td class="p-2 border-b">Integrates with Adobe Cloud</td><td class="p-2 border-b">Needs Adobe Cloud Membership</td><td class="p-2 border-b">Creatives</td></tr>
+                                    <tr><td class="p-2 border-b">Behance</td><td class="p-2 border-b">Easy</td><td class="p-2 border-b">Networking, part of Adobe</td><td class="p-2 border-b">Free</td><td class="p-2 border-b">Designers, artists</td></tr>
+                                    <tr><td class="p-2 border-b">Framer</td><td class="p-2 border-b">Super easy (Figma-like)</td><td class="p-2 border-b">CMS, collaboration</td><td class="p-2 border-b">Yes (branding)</td><td class="p-2 border-b">Designers needing CMS</td></tr>
+                                    <tr><td class="p-2 border-b">Carrd</td><td class="p-2 border-b">Simple, fast</td><td class="p-2 border-b">One-page sites</td><td class="p-2 border-b">3 free sites</td><td class="p-2 border-b">Personal, landing pages</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xl font-semibold text-sky-700 mb-2">Platform Feature Ratings (Example)</h3>
+                        <div class="chart-container bg-stone-50 p-2 rounded-md shadow">
+                            <canvas id="platformChart"></canvas>
+                        </div>
+                         <p class="text-xs italic text-center mt-1">Consider factors like template quality, customization, and CMS capabilities.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="maintenance" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-3xl font-bold mb-6 text-sky-700">5. Maintain & Avoid Mistakes</h2>
+                    <div class="section-intro">
+                        <p class="text-lg text-stone-700">A portfolio is a living document, not a one-time task. Regular updates are crucial to demonstrate continuous growth and relevance. This section also highlights common pitfalls to avoid, ensuring your portfolio remains a powerful asset.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-xl font-semibold text-sky-700 mb-2">Regular Review & Updates</h3>
+                            <ul class="list-disc list-inside space-y-1 text-sm text-stone-600">
+                                <li>Review every 3-6 months.</li>
+                                <li>Add new work and skills.</li>
+                                <li>Remove outdated or irrelevant projects.</li>
+                                <li>Ensure all links and contact info are current.</li>
+                                <li>Demonstrate continuous learning and growth.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-sky-700 mb-2">Common Mistakes to Avoid (Interactive Checklist)</h3>
+                            <ul id="mistakesChecklist" class="space-y-2 text-sm">
+                                </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="contact-example" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-3xl font-bold mb-6 text-sky-700">6. Example Contact Section</h2>
+                    <div class="section-intro">
+                        <p class="text-lg text-stone-700">Make it effortless for potential clients or employers to connect with you. This section demonstrates how to include essential contact details and a clear call to action (CTA) to encourage engagement.</p>
+                    </div>
+                    <p class="mb-4">Your portfolio should make it easy for people to reach out. Include clear contact information and a call to action.</p>
+
+                    <div class="max-w-lg mx-auto bg-stone-50 p-6 rounded-md border border-stone-200">
+                        <h3 class="text-xl font-semibold text-center text-sky-700 mb-4">Get In Touch!</h3>
+                        <form action="#" method="POST" class="space-y-4 text-sm">
+                            <div>
+                                <label for="name" class="block text-stone-700">Full Name</label>
+                                <input type="text" name="name" id="name" placeholder="Your Name" class="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-stone-700">Email Address</label>
+                                <input type="email" name="email" id="email" placeholder="you@example.com" class="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500">
+                            </div>
+                            <div>
+                                <label for="message" class="block text-stone-700">Message</label>
+                                <textarea name="message" id="message" rows="4" placeholder="Your message..." class="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500"></textarea>
+                            </div>
+                            <div>
+                                <button type="submit" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
+                                    Send Message (Example)
+                                </button>
+                            </div>
+                        </form>
+                        <div class="mt-6 text-center">
+                            <p class="text-sm text-stone-600">Or connect with me on:</p>
+                            <div class="flex justify-center space-x-4 mt-2">
+                                <a href="#" class="text-sky-600 hover:text-sky-800">LinkedIn</a>
+                                <a href="#" class="text-sky-600 hover:text-sky-800">GitHub</a>
+                                <a href="#" class="text-sky-600 hover:text-sky-800">Twitter</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const contentSubTabLinks = document.querySelectorAll('.content-sub-tab-link');
+            const contentSubTabContents = document.querySelectorAll('.content-sub-tab-content');
+            const menuButton = document.getElementById('menuButton');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+
+            function updateActiveLink(links, activeLink) {
+                links.forEach(link => {
+                    link.classList.remove('text-sky-700', 'bg-stone-100');
+                    link.classList.add('text-stone-600');
+                });
+                activeLink.classList.add('text-sky-700', 'bg-stone-100');
+                activeLink.classList.remove('text-stone-600');
+            }
+            
+            function openTab(tabName) {
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                const activeContent = document.getElementById(tabName);
+                if (activeContent) {
+                    activeContent.classList.add('active');
+                }
+            }
+
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const tabName = this.getAttribute('data-tab');
+                    openTab(tabName);
+                    updateActiveLink(tabLinks, this);
+                    window.location.hash = this.getAttribute('href');
+
+                    if (sidebar.classList.contains('sidebar-open') && window.innerWidth < 768) {
+                        sidebar.classList.remove('sidebar-open');
+                        sidebar.classList.add('sidebar-closed');
+                        mainContent.classList.remove('ml-64');
+                    }
+                });
+            });
+
+            contentSubTabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const subTabName = this.getAttribute('data-subtab');
+                    
+                    contentSubTabContents.forEach(content => {
+                        content.classList.remove('active-sub-content');
+                        content.style.display = 'none';
+                    });
+                    document.getElementById(subTabName).classList.add('active-sub-content');
+                    document.getElementById(subTabName).style.display = 'block';
+
+                    contentSubTabLinks.forEach(l => l.classList.remove('active-sub-tab'));
+                    this.classList.add('active-sub-tab');
+                });
+            });
+            
+            // Style for sub-tabs
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .content-sub-tab-link {
+                    padding: 0.5rem 1rem;
+                    cursor: pointer;
+                    border-bottom: 2px solid transparent;
+                    color: #4B5563; /* stone-600 */
+                }
+                .content-sub-tab-link:hover {
+                    border-bottom-color: #3B82F6; /* sky-500 */
+                    color: #0369A1; /* sky-700 */
+                }
+                .content-sub-tab-link.active-sub-tab {
+                    border-bottom-color: #0284C7; /* sky-600 */
+                    color: #0284C7; /* sky-600 */
+                    font-weight: 600;
+                }
+                .content-sub-tab-content { display: none; }
+                .content-sub-tab-content.active-sub-content { display: block; }
+            `;
+            document.head.appendChild(style);
+
+
+            // Initial tab from URL hash or default
+            const currentHash = window.location.hash.substring(1);
+            if (currentHash) {
+                const linkToActivate = document.querySelector(`.tab-link[data-tab="${currentHash}"]`);
+                if (linkToActivate) {
+                    openTab(currentHash);
+                    updateActiveLink(tabLinks, linkToActivate);
+                } else {
+                    openTab('introduction');
+                     updateActiveLink(tabLinks, document.querySelector('.tab-link[data-tab="introduction"]'));
+                }
+            } else {
+                 openTab('introduction');
+                 updateActiveLink(tabLinks, document.querySelector('.tab-link[data-tab="introduction"]'));
+            }
+            // Set default active sub-tab for content section
+             if(document.getElementById('about-me')) {
+                document.getElementById('about-me').style.display = 'block';
+             }
+             if(document.querySelector('.content-sub-tab-link[data-subtab="about-me"]')) {
+                document.querySelector('.content-sub-tab-link[data-subtab="about-me"]').classList.add('active-sub-tab');
+             }
+
+
+            // Example Projects Data
+            const projectsData = [
+                {
+                    title: "E-commerce Platform Redesign",
+                    overview: "Led the redesign of a major e-commerce platform to improve user experience and conversion rates.",
+                    challenge: "The existing platform had an outdated UI, poor navigation, and low mobile conversion rates, leading to customer frustration and lost sales.",
+                    role: "Lead UX Designer. Responsible for user research, journey mapping, wireframing, prototyping, usability testing, and collaborating with developers.",
+                    approach: "Utilized a user-centered design process, conducting surveys and interviews. Developed personas and user flows. Created interactive prototypes in Figma and iterated based on A/B testing and stakeholder feedback.",
+                    solution: "Implemented a responsive design with intuitive navigation, streamlined checkout process, and personalized product recommendations.",
+                    results: "Increased mobile conversion rates by 35%, reduced bounce rate by 20%, and improved overall user satisfaction scores by 25% within 6 months.",
+                    skills: "UX Research, UI Design, Prototyping, Figma, A/B Testing, Agile"
+                },
+                {
+                    title: "Mobile Health App Development",
+                    overview: "Developed a cross-platform mobile application for tracking fitness and nutrition.",
+                    challenge: "Users needed a simple, engaging way to monitor their health goals, often struggling with complex interfaces or lack of motivation from existing apps.",
+                    role: "Full-Stack Developer. Contributed to both frontend (React Native) and backend (Node.js, MongoDB) development, API integration, and feature implementation.",
+                    approach: "Followed an Agile methodology with bi-weekly sprints. Focused on creating a clean, intuitive UI and gamification elements to enhance user engagement. Integrated with third-party health APIs.",
+                    solution: "Launched a native-like mobile app with features like progress tracking, meal logging, personalized workout plans, and social sharing.",
+                    results: "Achieved 50,000+ downloads in the first year. 4.5-star average rating on app stores. Featured as 'App of the Day' for its user-friendly design.",
+                    skills: "React Native, Node.js, MongoDB, API Integration, Firebase, Agile Project Management"
+                },
+                {
+                    title: "Data Analytics Dashboard for Sales Team",
+                    overview: "Created an interactive dashboard to provide real-time insights into sales performance and customer behavior.",
+                    challenge: "The sales team lacked a centralized view of key metrics, relying on manual reports that were time-consuming and often outdated, hindering quick decision-making.",
+                    role: "Data Analyst. Responsible for data gathering, cleaning, transformation, visualization, and dashboard development using Tableau.",
+                    approach: "Collaborated with sales stakeholders to identify key performance indicators (KPIs). Designed data models and ETL processes. Developed interactive visualizations allowing for drill-down and filtering.",
+                    solution: "Delivered a web-based Tableau dashboard providing real-time tracking of sales trends, customer segmentation, and product performance.",
+                    results: "Reduced report generation time by 80%. Enabled sales managers to identify and act on trends 50% faster. Contributed to a 10% increase in sales effectiveness.",
+                    skills: "Tableau, SQL, Python (Pandas), Data Visualization, ETL, Requirements Gathering"
+                }
+            ];
+
+            const projectListContainer = document.getElementById('projectList');
+            if (projectListContainer) {
+                projectsData.forEach(project => {
+                    const projectCard = document.createElement('div');
+                    projectCard.className = 'p-4 border rounded-lg bg-stone-50 shadow-sm project-card cursor-pointer hover:shadow-md transition-shadow';
+                    projectCard.innerHTML = `
+                        <h4 class="text-lg font-semibold text-sky-700 mb-1">${project.title}</h4>
+                        <p class="text-xs text-stone-500 mb-2">${project.overview}</p>
+                        <div class="project-details hidden text-sm space-y-2 mt-3 pt-3 border-t border-stone-200">
+                            <p><strong>Challenge:</strong> ${project.challenge}</p>
+                            <p><strong>My Role & Contributions:</strong> ${project.role}</p>
+                            <p><strong>Approach & Methodology:</strong> ${project.approach}</p>
+                            <p><strong>Solution Implemented:</strong> ${project.solution}</p>
+                            <p><strong>Measurable Results & Impact:</strong> <span class="font-medium text-green-600">${project.results}</span></p>
+                            <p><strong>Skills/Tools Used:</strong> <span class="italic">${project.skills}</span></p>
+                        </div>
+                    `;
+                    projectListContainer.appendChild(projectCard);
+
+                    projectCard.addEventListener('click', function() {
+                        this.querySelector('.project-details').classList.toggle('hidden');
+                    });
+                });
+            }
+            
+
+            // Skills Chart
+            const skillsCtx = document.getElementById('skillsChart');
+            if (skillsCtx) {
+                new Chart(skillsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['JavaScript', 'Python', 'UX Design', 'Project Management', 'Communication', 'Data Analysis'],
+                        datasets: [{
+                            label: 'Proficiency Level (Example)',
+                            data: [90, 75, 85, 95, 90, 70],
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)', /* sky-500 with opacity */
+                            borderColor: 'rgba(59, 130, 246, 1)', /* sky-500 */
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, max: 100 } },
+                        plugins: { legend: { display: false }, tooltip: { displayColors:false } }
+                    }
+                });
+            }
+
+            // Platform Chart
+            const platformCtx = document.getElementById('platformChart');
+            if (platformCtx) {
+                new Chart(platformCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Ease of Use', 'Customization', 'Cost (Free Tier)', 'Templates', 'Community'],
+                        datasets: [
+                            {
+                                label: 'Wix (Example)',
+                                data: [9, 7, 8, 9, 7],
+                                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                pointBackgroundColor: 'rgba(59, 130, 246, 1)'
+                            },
+                            {
+                                label: 'Framer (Example)',
+                                data: [8, 9, 7, 7, 8],
+                                backgroundColor: 'rgba(16, 185, 129, 0.2)', /* emerald-500 */
+                                borderColor: 'rgba(16, 185, 129, 1)',
+                                pointBackgroundColor: 'rgba(16, 185, 129, 1)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { r: { beginAtZero: true, max: 10, pointLabels: { font: {size: 10}} } },
+                        plugins: { legend: { position: 'top'} }
+                    }
+                });
+            }
+
+            // Mistakes Checklist
+            const mistakes = [
+                "Overcrowding with too many projects.",
+                "Poor navigation or user experience.",
+                "Missing contact info or call to action.",
+                "Inconsistent visual design or branding.",
+                "Including outdated or irrelevant content.",
+                "Weak or missing project descriptions (no context/impact).",
+                "Ignoring the target audience (one-size-fits-all).",
+                "Lack of social proof (testimonials).",
+                "Low-quality images or media.",
+                "Not being mobile-friendly.",
+                "Too much 'fluff' or no personality.",
+                "Forgetting to proofread and spellcheck."
+            ];
+            const checklistContainer = document.getElementById('mistakesChecklist');
+            if (checklistContainer) {
+                mistakes.forEach(mistake => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center p-2 bg-stone-50 rounded-md border border-stone-200 hover:bg-stone-100 cursor-pointer';
+                    li.innerHTML = `
+                        <input type="checkbox" class="h-4 w-4 text-sky-600 border-stone-300 rounded focus:ring-sky-500 mr-2">
+                        <span>${mistake}</span>
+                    `;
+                    checklistContainer.appendChild(li);
+                    li.addEventListener('click', (e) => {
+                        const checkbox = li.querySelector('input[type="checkbox"]');
+                        if (e.target !== checkbox) { // toggle if click is not on checkbox itself
+                           checkbox.checked = !checkbox.checked;
+                        }
+                         li.classList.toggle('line-through', checkbox.checked);
+                         li.classList.toggle('text-stone-400', checkbox.checked);
+                    });
+                });
+            }
+
+            // Sidebar toggle for mobile
+            menuButton.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-closed');
+                sidebar.classList.toggle('sidebar-open');
+                if (sidebar.classList.contains('sidebar-open')) {
+                     mainContent.classList.add('ml-64'); // Only for effect if sidebar was overlaying
+                } else {
+                     mainContent.classList.remove('ml-64');
+                }
+            });
+
+            // Close sidebar when clicking a link on mobile
+             if (window.innerWidth < 768) { // md breakpoint
+                tabLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (sidebar.classList.contains('sidebar-open')) {
+                            sidebar.classList.remove('sidebar-open');
+                            sidebar.classList.add('sidebar-closed');
+                             mainContent.classList.remove('ml-64');
+                        }
+                    });
+                });
+            }
+             // Adjust main content margin based on sidebar visibility (for larger screens)
+            function adjustMainContentMargin() {
+                if (window.innerWidth >= 768) { // md breakpoint
+                    if (sidebar.classList.contains('sidebar-open')) {
+                        mainContent.classList.add('md:ml-64');
+                        mainContent.classList.remove('ml-0')
+
+                    } else {
+                        mainContent.classList.remove('md:ml-64');
+                         mainContent.classList.add('ml-0');
+                    }
+                } else {
+                     mainContent.classList.remove('md:ml-64'); // remove fixed margin on mobile
+                }
+            }
+
+            // Initial adjustment and on resize
+            adjustMainContentMargin();
+            window.addEventListener('resize', adjustMainContentMargin);
+
+        });
+    </script>
+</body>
+</html>
